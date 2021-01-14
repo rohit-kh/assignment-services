@@ -16,3 +16,24 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->group([
+//    'middleware' => 'api',
+    'prefix' => 'apis/auth'
+], function ($router) {
+    $router->post('login', 'AuthController@login');
+    $router->post('logout', 'AuthController@logout');
+    $router->post('register', 'AuthController@register');
+    $router->post('profile', 'AuthController@profile');
+    $router->post('refresh', 'AuthController@refresh');
+});
+
+$router->group([
+//    'middleware' => 'api',
+    'prefix' => 'apis',
+    'middleware' => ['auth:api', 'role:INSTRUCTOR']
+], function ($router) {
+    $router->get('instructor', 'InstructorController@index');
+    $router->post('instructor/assignment', 'AssignmentController@store');
+    $router->get('instructor/assignment', 'AssignmentController@index');
+});

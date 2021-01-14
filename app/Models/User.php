@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Lumen\Auth\Authorizable;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+use Tymon\JWTAuth\Contracts\JWTSubject;
+
+class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
     use Authenticatable, Authorizable, HasFactory;
 
@@ -19,7 +21,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'name', 'email',
+        'name', 'email', 'password'
     ];
 
     /**
@@ -30,4 +32,52 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $hidden = [
         'password',
     ];
+
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function roles()
+    {
+        return $this->hasMany(UserRoles::class, "user_id", "id");
+    }
+
+    public function subjects()
+    {
+        return $this->hasMany(InstructorSubject::class, "created_by", "id");
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignments::class, "created_by", "id");
+    }
+
+//    public function testHasOneThrough()
+//    {
+//        return $this->hasOneThrough(
+//            Assignments::class,
+//            InstructorSubject::class,
+//            'instructor_id', // Foreign key on the InstructorSubject table...
+//            'instructor_subject_id', // Foreign key on the owners table...
+//            'id', // Local key on the Assignments table...
+//            'id' // Local key on the InstructorSubject table...
+//        );
+//    }
 }
